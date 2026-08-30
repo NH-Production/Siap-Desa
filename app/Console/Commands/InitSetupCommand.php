@@ -46,13 +46,16 @@ class InitSetupCommand extends Command
         $village->postal_code = $data['postal_code'] ?? '43265';
         $village->save();
 
-        // 2. Update System Settings & SAAS License
+        // 2. Update System Settings & SAAS License with Locked Client ID
         SystemSetting::set('village_name', $village->name);
         SystemSetting::set('village_code', $village->code);
         SystemSetting::set('is_configured', '1');
         SystemSetting::set('saas_license_key', $data['license_key'] ?? 'SIAP-SAAS-3203-1620-02-2026');
+        SystemSetting::set('locked_client_id', $data['locked_client_id'] ?? 'CLNT-3203162002-SINDANGRESMI');
         SystemSetting::set('saas_status', $data['license_status'] ?? 'ACTIVE_ENTERPRISE');
-        SystemSetting::set('central_api_url', $data['central_api_url'] ?? 'https://api.siapdesa.id/api/v1');
+        SystemSetting::set('central_api_url', $data['central_api_url'] ?? 'http://127.0.0.1:8090/api/v1');
+        SystemSetting::set('supabase_key', $data['supabase_key'] ?? 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve');
+        SystemSetting::set('supabase_url', $data['supabase_url'] ?? 'https://siapdesa.supabase.co');
 
         // 3. Update Super Admin Account
         $adminUser = User::where('username', $data['admin_username'] ?? 'admin')->first() ?? User::where('username', 'admin')->first();
@@ -60,7 +63,7 @@ class InitSetupCommand extends Command
             $adminUser = new User();
             $adminUser->uuid = (string)Str::uuid();
         }
-        $adminUser->name = $data['admin_fullname'] ?? 'Administrator Desa';
+        $adminUser->name = $data['admin_fullname'] ?? 'Administrator Desa Sindangresmi';
         $adminUser->username = $data['admin_username'] ?? 'admin';
         $adminUser->email = $data['admin_email'] ?? 'admin@sindangresmi-takokak.desa.id';
         if (!empty($data['admin_password'])) {
@@ -82,7 +85,7 @@ class InitSetupCommand extends Command
             $device->save();
         }
 
-        $this->info("Konfigurasi Desa, Super Admin, dan Lisensi SAAS berhasil diterapkan 100%!");
+        $this->info("Konfigurasi Desa, Super Admin, dan Lisensi SAAS (Client ID: {$data['locked_client_id']}) berhasil diterapkan 100%!");
         return 0;
     }
 }
