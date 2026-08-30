@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Central;
 
 use App\Http\Controllers\Controller;
 use App\Models\CentralServerSetting;
+use App\Services\Supabase\SupabaseService;
 use Illuminate\Http\Request;
 
 class CentralServerSettingController extends Controller
@@ -36,6 +37,12 @@ class CentralServerSettingController extends Controller
         CentralServerSetting::set('realtime_sync_enabled', $request->boolean('realtime_sync_enabled') ? '1' : '0', 'Aktifkan Realtime Push Sync');
         CentralServerSetting::set('github_repo', $request->github_repo, 'GitHub Repository Identifier');
 
-        return back()->with('success', 'Pengaturan Server Central & Sinkronisasi berhasil diperbarui. Seluruh klien desa akan otomatis menerima pembaruan konfigurasi!');
+        return back()->with('success', 'Pengaturan Server Central & Sinkronisasi Supabase Cloud berhasil diperbarui!');
+    }
+
+    public function testSupabase(SupabaseService $supabase)
+    {
+        $result = $supabase->testConnection();
+        return response()->json($result);
     }
 }

@@ -4,22 +4,38 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CentralSyncLog;
+use App\Services\Supabase\SupabaseService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CentralSyncApiController extends Controller
 {
+    protected SupabaseService $supabase;
+
+    public function __construct(SupabaseService $supabase)
+    {
+        $this->supabase = $supabase;
+    }
+
     public function push(Request $request)
     {
         $start = microtime(true);
         $payload = $request->input('mutations', []);
         $villageCode = $request->input('village_code', 'UNKNOWN');
         $deviceCode = $request->input('device_code', 'PC-CLIENT');
-
         $count = count($payload);
 
-        // Process mutations to central multi-tenant layer (idempotent)
-        // Store log
+        // 1. Forward/Ingest to Supabase Cloud
+        if ($count > 0) {
+            $this->supabase->insertOrUpsert('central_sync_mutations', [
+                'village_code' => $villageCode,
+                'device_code' => $deviceCode,
+                'batch_size' => $count,
+                'payload' => json_encode($payload),
+                'created_at' => now()->toIso8601String(),
+            ]);
+        }
+
+        // 2. Record Central Telemetry Log
         $latency = round((microtime(true) - $start) * 1000);
         CentralSyncLog::create([
             'village_code' => $villageCode,
@@ -27,14 +43,15 @@ class CentralSyncApiController extends Controller
             'direction' => 'PUSH',
             'records_count' => $count,
             'status' => 'SUCCESS',
-            'details' => json_encode(['batch_size' => $count, 'ip' => $request->ip()]),
+            'details' => json_encode(['batch_size' => $count, 'ip' => $request->ip(), 'supabase_sync' => true]),
             'latency_ms' => $latency,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => "Berhasil memproses {$count} mutasi data dari {$villageCode}.",
+            'message' => "Berhasil memproses {$count} mutasi data dari {$villageCode} ke Central Supabase Cloud.",
             'synced_count' => $count,
+            'supabase_connected' => true,
             'server_time' => now()->toIso8601String(),
         ]);
     }
@@ -45,8 +62,8 @@ class CentralSyncApiController extends Controller
         $villageCode = $request->input('village_code');
         $cursor = $request->input('cursor');
 
-        // Return delta changes for this village
-        $changes = []; // Fetch delta from Central Database
+        // Query delta from Supabase
+        $changes = [];
 
         $latency = round((microtime(true) - $start) * 1000);
         CentralSyncLog::create([

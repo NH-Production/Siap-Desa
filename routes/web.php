@@ -199,8 +199,10 @@ Route::prefix('central')->name('central.')->group(function () {
     Route::get('/telemetry/live', [\App\Http\Controllers\Central\CentralTelemetryController::class, 'liveData'])->name('telemetry.live');
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Central\CentralServerSettingController::class, 'index'])->name('index');
-        Route::post('/update', [\App\Http\Controllers\Central\CentralServerSettingController::class, 'update'])->name('update');
+                Route::post('/update', [\App\Http\Controllers\Central\CentralServerSettingController::class, 'update'])->name('update');
+        Route::post('/test-supabase', [\App\Http\Controllers\Central\CentralServerSettingController::class, 'testSupabase'])->name('test-supabase');
     });
 });
+
 
 
