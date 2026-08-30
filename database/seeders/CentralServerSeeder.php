@@ -1,0 +1,112 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\CentralDevice;
+use App\Models\CentralLicense;
+use App\Models\CentralRelease;
+use App\Models\CentralSyncLog;
+use App\Models\CentralVillage;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+
+class CentralServerSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // 1. Desa Sindangresmi (Tenant 1)
+        $v1 = CentralVillage::updateOrCreate(
+            ['code' => '3203162002'],
+            [
+                'name' => 'Sindangresmi',
+                'district' => 'Takokak',
+                'regency' => 'Kabupaten Cianjur',
+                'province' => 'Jawa Barat',
+                'head_name' => 'IMAS, S.IP., NL.P',
+                'phone' => '0812-3456-7890',
+                'email' => 'pemdes@sindangresmi-takokak.desa.id',
+                'status' => 'ACTIVE',
+                'address' => 'Jl. Raya Takokak No. 12, Desa Sindangresmi',
+            ]
+        );
+
+        $lic1 = CentralLicense::updateOrCreate(
+            ['license_key' => 'SIAP-SAAS-3203-1620-02-2026'],
+            [
+                'central_village_id' => $v1->id,
+                'tier' => 'ENTERPRISE',
+                'max_devices' => 10,
+                'issued_date' => '2026-01-01',
+                'expiry_date' => '2027-01-01',
+                'status' => 'ACTIVE',
+                'notes' => 'Lisensi resmi Pemerintah Desa Sindangresmi',
+            ]
+        );
+
+        CentralDevice::updateOrCreate(
+            ['central_license_id' => $lic1->id, 'device_code' => 'PC-ADMIN-01'],
+            [
+                'device_name' => 'Komputer Pelayanan Utama Desa Sindangresmi',
+                'app_version' => '1.0.0',
+                'last_seen_at' => now(),
+                'status' => 'ACTIVE',
+            ]
+        );
+
+        // 2. Desa Sukamaju (Tenant 2)
+        $v2 = CentralVillage::updateOrCreate(
+            ['code' => '3203162001'],
+            [
+                'name' => 'Sukamaju Sejahtera',
+                'district' => 'Takokak',
+                'regency' => 'Kabupaten Cianjur',
+                'province' => 'Jawa Barat',
+                'head_name' => 'H. Rahmat Hidayat, S.Sos',
+                'phone' => '0813-9876-5432',
+                'email' => 'pemdes@sukamaju.desa.id',
+                'status' => 'ACTIVE',
+                'address' => 'Jl. Desa Sukamaju No. 01',
+            ]
+        );
+
+        CentralLicense::updateOrCreate(
+            ['license_key' => 'SIAP-SAAS-3203-STD-7712-2026'],
+            [
+                'central_village_id' => $v2->id,
+                'tier' => 'STANDARD',
+                'max_devices' => 3,
+                'issued_date' => '2026-02-01',
+                'expiry_date' => '2027-02-01',
+                'status' => 'ACTIVE',
+                'notes' => 'Lisensi Standard Desa Sukamaju',
+            ]
+        );
+
+        // 3. Central Release v1.0.1
+        CentralRelease::updateOrCreate(
+            ['version' => '1.0.1'],
+            [
+                'schema_version' => 2,
+                'title' => 'Pembaruan Modul Server Cloud, Live Camera Scanner, dan Icon Desktop',
+                'changelog' => "- Penambahan Live Camera QR Code scanner dengan feedback audio bip.\n- Integrasi Central Cloud Server Panel & License Management.\n- Icon resmi Windows .ICO.\n- Peningkatan performa database.",
+                'file_name' => 'SIAP_Desa_Patch_v1.0.1.zip',
+                'file_path' => 'downloads/patches/SIAP_Desa_Patch_v1.0.1.zip',
+                'file_size' => 135311,
+                'is_mandatory' => false,
+                'is_published' => true,
+                'release_date' => '2026-08-30',
+            ]
+        );
+
+        // 4. Sample Telemetry Log
+        CentralSyncLog::create([
+            'village_code' => '3203162002',
+            'device_code' => 'PC-ADMIN-01',
+            'direction' => 'PUSH',
+            'records_count' => 12,
+            'status' => 'SUCCESS',
+            'latency_ms' => 45,
+            'details' => 'Handshake & delta push initial',
+        ]);
+    }
+}

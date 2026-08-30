@@ -1,0 +1,43 @@
+name: SIAP Desa CI/CD - Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, pdo_mysql, curl, gd, zip, bcmath, fileinfo
+
+      - name: Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader --prefer-dist
+
+      - name: Build Standalone Patch & Setup Packages
+        shell: powershell
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\launcher\compile.ps1
+          Write-Host "Build completed for tag ${{ github.ref_name }}"
+
+      - name: Create GitHub Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            SIAP_Desa_Setup_*.exe
+            SIAP_Desa_Patch_*.exe
+            patches/*.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
