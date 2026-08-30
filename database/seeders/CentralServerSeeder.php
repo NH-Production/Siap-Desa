@@ -15,9 +15,11 @@ class CentralServerSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Central Server Settings
-        CentralServerSetting::set('supabase_url', 'https://siapdesa.supabase.co', 'Supabase Cloud REST URL');
+        // 1. Official Supabase Project Settings
+        CentralServerSetting::set('supabase_url', 'https://yrzuksjgmsumtllbokpc.supabase.co', 'Official Supabase Cloud REST URL');
         CentralServerSetting::set('supabase_key', 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve', 'Supabase API Publishable Key');
+        CentralServerSetting::set('supabase_publishable_key', 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve', 'Supabase API Publishable Key');
+        CentralServerSetting::set('supabase_jwks_url', 'https://yrzuksjgmsumtllbokpc.supabase.co/auth/v1/.well-known/jwks.json', 'Supabase JWKS URL');
         CentralServerSetting::set('central_api_key', 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve', 'Central API Access Key');
         CentralServerSetting::set('sync_interval_seconds', '30', 'Global Client Sync Interval (detik)');
         CentralServerSetting::set('realtime_sync_enabled', '1', 'Aktifkan Realtime Push Sync');
@@ -50,7 +52,7 @@ class CentralServerSeeder extends Seeder
                 'issued_date' => '2026-01-01',
                 'expiry_date' => '2027-01-01',
                 'status' => 'ACTIVE',
-                'notes' => 'Lisensi resmi Pemerintah Desa Sindangresmi',
+                'notes' => 'Lisensi resmi Pemerintah Desa Sindangresmi (Supabase Cloud Connected)',
             ]
         );
 
@@ -100,8 +102,8 @@ class CentralServerSeeder extends Seeder
             ['version' => '1.0.1'],
             [
                 'schema_version' => 2,
-                'title' => 'Pembaruan Modul Server Cloud, Live Camera Scanner, dan Icon Desktop',
-                'changelog' => "- Penambahan Live Camera QR Code scanner dengan feedback audio bip.\n- Integrasi Central Cloud Server Panel & License Management.\n- Icon resmi Windows .ICO.\n- Peningkatan performa database.",
+                'title' => 'Pembaruan Modul Server Cloud Supabase, Live Camera Scanner, dan Icon Desktop',
+                'changelog' => "- Integrasi Supabase Cloud PostgreSQL REST API (yrzuksjgmsumtllbokpc).\n- Penambahan Live Camera QR Code scanner dengan audio bip.\n- Central Cloud Server Panel & Dynamic Client ID Locking.\n- Icon resmi Windows .ICO.",
                 'file_name' => 'SIAP_Desa_Patch_v1.0.1.zip',
                 'file_path' => 'downloads/patches/SIAP_Desa_Patch_v1.0.1.zip',
                 'file_size' => 135311,
@@ -119,7 +121,7 @@ class CentralServerSeeder extends Seeder
             'records_count' => 12,
             'status' => 'SUCCESS',
             'latency_ms' => 45,
-            'details' => 'Handshake & delta push initial',
+            'details' => 'Handshake & delta push to Supabase Cloud yrzuksjgmsumtllbokpc',
         ]);
     }
 }
