@@ -195,6 +195,12 @@ Route::prefix('central')->name('central.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Central\CentralReleaseController::class, 'index'])->name('index');
         Route::post('/store', [\App\Http\Controllers\Central\CentralReleaseController::class, 'store'])->name('store');
     });
-    Route::get('/telemetry', [\App\Http\Controllers\Central\CentralTelemetryController::class, 'index'])->name('telemetry');
+        Route::get('/telemetry', [\App\Http\Controllers\Central\CentralTelemetryController::class, 'index'])->name('telemetry');
+    Route::get('/telemetry/live', [\App\Http\Controllers\Central\CentralTelemetryController::class, 'liveData'])->name('telemetry.live');
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Central\CentralServerSettingController::class, 'index'])->name('index');
+        Route::post('/update', [\App\Http\Controllers\Central\CentralServerSettingController::class, 'update'])->name('update');
+    });
 });
+
 

@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CentralDevice;
 use App\Models\CentralLicense;
+use App\Models\CentralServerSetting;
 use App\Models\CentralVillage;
 use Illuminate\Http\Request;
 
 class CentralLicenseApiController extends Controller
 {
-    public function verify(Request $request)
+    public function config(Request $request)
     {
         $request->validate([
             'license_key' => 'required|string',
@@ -25,14 +26,14 @@ class CentralLicenseApiController extends Controller
         if (!$license) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kode lisensi tidak valid atau tidak terdaftar di Central Server.',
+                'message' => 'Kode lisensi tidak ditemukan pada Server SIAP CLOUD.',
             ], 404);
         }
 
         if ($license->status !== 'ACTIVE') {
             return response()->json([
                 'success' => false,
-                'message' => "Lisensi ini berstatus: {$license->status}. Silakan hubungi Administrator Cloud.",
+                'message' => "Lisensi desa ini berstatus: {$license->status}. Silakan hubungi Administrator SIAP CLOUD.",
             ], 403);
         }
 
@@ -43,7 +44,22 @@ class CentralLicenseApiController extends Controller
             ], 403);
         }
 
-        // Register or update device
+        $village = $license->village;
+
+        // Ensure village has Client ID
+        if (empty($village->client_id)) {
+            $cleanName = strtoupper(preg_replace('/[^A-Z0-9]/', '', $village->name));
+            $village->client_id = 'CLNT-' . $village->code . '-' . $cleanName;
+            $village->save();
+        }
+
+        // Lock Client ID to License
+        if (empty($license->locked_client_id)) {
+            $license->locked_client_id = $village->client_id;
+            $license->save();
+        }
+
+        // Register / Update Device
         $device = CentralDevice::updateOrCreate(
             ['central_license_id' => $license->id, 'device_code' => $request->device_code],
             [
@@ -56,23 +72,35 @@ class CentralLicenseApiController extends Controller
             ]
         );
 
-        $activeDevicesCount = CentralDevice::where('central_license_id', $license->id)->where('status', 'ACTIVE')->count();
+        $supabaseUrl = CentralServerSetting::get('supabase_url', 'https://siapdesa.supabase.co');
+        $supabaseKey = CentralServerSetting::get('supabase_key', 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve');
+        $syncInterval = (int)CentralServerSetting::get('sync_interval_seconds', 30);
+        $realtimeSync = CentralServerSetting::get('realtime_sync_enabled', '1') === '1';
 
         return response()->json([
             'success' => true,
-            'message' => 'Lisensi terverifikasi aktif (Enterprise SAAS).',
+            'message' => 'Konfigurasi server berhasil ditarik & Client ID terkunci.',
             'data' => [
-                'village_code' => $license->village->code,
-                'village_name' => $license->village->name,
-                'district' => $license->village->district,
-                'regency' => $license->village->regency,
-                'province' => $license->village->province,
+                'client_id' => $village->client_id,
+                'license_key' => $license->license_key,
                 'tier' => $license->tier,
+                'village_code' => $village->code,
+                'village_name' => $village->name,
+                'district' => $village->district,
+                'regency' => $village->regency,
+                'province' => $village->province,
                 'max_devices' => $license->max_devices,
-                'active_devices' => $activeDevicesCount,
-                'expiry_date' => $license->expiry_date ? $license->expiry_date->format('Y-m-d') : null,
-                'sync_token' => hash('sha256', $license->license_key . '|' . $device->device_code),
+                'supabase_url' => $supabaseUrl,
+                'supabase_key' => $supabaseKey,
+                'sync_interval_seconds' => $syncInterval,
+                'realtime_sync_enabled' => $realtimeSync,
+                'sync_token' => hash('sha256', $license->license_key . '|' . $village->client_id . '|' . $device->device_code),
             ]
         ]);
+    }
+
+    public function verify(Request $request)
+    {
+        return $this->config($request);
     }
 }

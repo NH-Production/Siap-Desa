@@ -5,15 +5,15 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-1">Pusat Komando SIAP Desa Cloud (SAAS Server)</h4>
-        <p class="text-muted small mb-0">Monitoring multi-tenant desa, validasi lisensi real-time, dan status telemetri sinkronisasi.</p>
+        <h4 class="fw-bold mb-1">Pusat Komando SIAP CLOUD (Real-Time Master Portal)</h4>
+        <p class="text-muted small mb-0">Monitoring multi-tenant desa, validasi lisensi real-time, dan transmisi delta sync online.</p>
     </div>
     <div class="d-flex gap-2">
+        <a href="{{ route('central.settings.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-sliders me-1"></i> Pengaturan Server
+        </a>
         <a href="{{ route('central.licenses.index') }}" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-plus me-1"></i> Buat Lisensi Baru
-        </a>
-        <a href="{{ route('central.releases.index') }}" class="btn btn-outline-primary btn-sm">
-            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Rilis Patch OTA
         </a>
     </div>
 </div>
@@ -51,7 +51,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <span class="text-muted small d-block">Perangkat Terkoneksi</span>
-                    <h3 class="fw-bold text-info mb-0">{{ $totalDevices }}</h3>
+                    <h3 class="fw-bold text-info mb-0" id="liveActiveDevices">{{ $totalDevices }}</h3>
                 </div>
                 <div class="p-3 bg-info bg-opacity-10 text-info rounded-circle">
                     <i class="fa-solid fa-laptop fs-4"></i>
@@ -64,7 +64,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <span class="text-muted small d-block">Aktivitas Sync Hari Ini</span>
-                    <h3 class="fw-bold text-warning mb-0">{{ $todaySyncs }}</h3>
+                    <h3 class="fw-bold text-warning mb-0" id="liveTodaySyncs">{{ $todaySyncs }}</h3>
                 </div>
                 <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-circle">
                     <i class="fa-solid fa-rotate fs-4"></i>
@@ -75,35 +75,37 @@
 </div>
 
 <div class="row g-4">
-    <!-- Active Villages -->
+    <!-- Active Villages with Client ID -->
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-building-flag me-2 text-primary"></i>Desa Terdaftar Terbaru</span>
+                <span><i class="fa-solid fa-building-flag me-2 text-primary"></i>Desa Terdaftar & Client ID Unik</span>
                 <a href="{{ route('central.villages.index') }}" class="btn btn-link btn-sm p-0">Lihat Semua</a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0 small">
                     <thead class="table-light">
                         <tr>
-                            <th>Kode Desa</th>
+                            <th>Client ID</th>
                             <th>Nama Desa</th>
-                            <th>Wilayah</th>
-                            <th>Status Lisensi</th>
+                            <th>Kode Lisensi</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($villages as $v)
                         <tr>
-                            <td><code>{{ $v->code }}</code></td>
+                            <td><code class="fw-bold text-indigo" style="color:#4f46e5;">{{ $v->client_id ?? 'CLNT-' . $v->code }}</code></td>
                             <td class="fw-bold">{{ $v->name }}</td>
-                            <td>{{ $v->district }}, {{ $v->regency }}</td>
                             <td>
                                 @if($v->activeLicense)
-                                    <span class="badge bg-success">Active Enterprise</span>
+                                    <code>{{ $v->activeLicense->license_key }}</code>
                                 @else
-                                    <span class="badge bg-secondary">No Active License</span>
+                                    <span class="text-muted">-</span>
                                 @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-success">Active Enterprise</span>
                             </td>
                         </tr>
                         @empty
@@ -117,12 +119,15 @@
         </div>
     </div>
 
-    <!-- Live Telemetry Sync Logs -->
+    <!-- Live Real-Time Telemetry Stream -->
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-satellite-dish me-2 text-success"></i>Live Traffic Sinkronisasi</span>
-                <a href="{{ route('central.telemetry') }}" class="btn btn-link btn-sm p-0">Semua Log</a>
+                <span>
+                    <span class="pulse-indicator me-1"></span>
+                    <strong>Live Real-Time Sync Stream</strong>
+                </span>
+                <span class="badge bg-light text-dark border small" id="liveSyncStatus">Streaming Live...</span>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0 small">
@@ -130,18 +135,18 @@
                         <tr>
                             <th>Waktu</th>
                             <th>Desa</th>
-                            <th>Aksi</th>
+                            <th>Arah</th>
                             <th>Records</th>
-                            <th>Latency</th>
+                            <th>Latensi</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="liveSyncTableBody">
                         @forelse($recentSyncs as $log)
                         <tr>
                             <td>{{ $log->created_at->format('H:i:s') }}</td>
                             <td><strong>{{ $log->village_code }}</strong></td>
                             <td><span class="badge bg-{{ $log->direction == 'PUSH' ? 'primary' : 'info' }}">{{ $log->direction }}</span></td>
-                            <td>{{ $log->records_count }} item</td>
+                            <td>{{ $log->records_count }} mutasi</td>
                             <td><code>{{ $log->latency_ms }}ms</code></td>
                         </tr>
                         @empty
@@ -156,3 +161,38 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+// Real-time live polling engine every 2.5 seconds
+function pollLiveData() {
+    fetch("{{ route('central.telemetry.live') }}")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('liveTodaySyncs').innerText = data.today_syncs;
+            document.getElementById('liveActiveDevices').innerText = data.active_devices > 0 ? data.active_devices : data.total_devices;
+            
+            const tbody = document.getElementById('liveSyncTableBody');
+            if (data.recent_logs && data.recent_logs.length > 0) {
+                let html = '';
+                data.recent_logs.forEach(log => {
+                    const badgeClass = log.direction === 'PUSH' ? 'bg-primary' : 'bg-info';
+                    html += `
+                        <tr>
+                            <td>${log.time}</td>
+                            <td><strong>${log.village_code}</strong></td>
+                            <td><span class="badge ${badgeClass}">${log.direction}</span></td>
+                            <td>${log.records_count} mutasi</td>
+                            <td><code>${log.latency_ms}ms</code></td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+        })
+        .catch(e => console.log('Live poll error:', e));
+}
+
+setInterval(pollLiveData, 2500);
+</script>
+@endpush

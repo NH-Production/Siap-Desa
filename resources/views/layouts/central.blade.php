@@ -7,7 +7,7 @@
     <title>@yield('title', 'Central Cloud Server Panel') - SIAP Desa Cloud</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="icon" href="{{ asset('siap_desa.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('siap_server.ico') }}" type="image/x-icon">
     <style>
         :root {
             --central-navy: #0f172a;
@@ -92,6 +92,20 @@
             font-weight: 600;
             padding: 1rem 1.25rem;
         }
+        .pulse-indicator {
+            width: 9px;
+            height: 9px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 1.8s infinite;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
     </style>
 </head>
 <body>
@@ -99,7 +113,7 @@
     <!-- Central Sidebar -->
     <nav id="sidebar">
         <div class="sidebar-brand">
-            <i class="fa-solid fa-server text-warning"></i>
+            <i class="fa-solid fa-cloud text-warning"></i>
             <div>
                 <div style="line-height: 1.1;">SIAP CLOUD</div>
                 <small style="font-size: 0.65rem; color: #a5b4fc; font-weight: 400;">Central SAAS Portal</small>
@@ -107,18 +121,21 @@
         </div>
 
         <div class="py-2">
-            <div class="nav-header">Pusat Kontrol</div>
+            <div class="nav-header">Pusat Pengendali</div>
             <a class="nav-link {{ request()->is('central') ? 'active' : '' }}" href="{{ route('central.dashboard') }}">
                 <i class="fa-solid fa-gauge-high"></i> Dashboard Server
             </a>
             <a class="nav-link {{ request()->is('central/villages*') ? 'active' : '' }}" href="{{ route('central.villages.index') }}">
-                <i class="fa-solid fa-tree-city"></i> Manajemen Desa
+                <i class="fa-solid fa-tree-city"></i> Manajemen Desa (Tenants)
             </a>
             <a class="nav-link {{ request()->is('central/licenses*') ? 'active' : '' }}" href="{{ route('central.licenses.index') }}">
                 <i class="fa-solid fa-key"></i> Manajemen Lisensi
             </a>
+            <a class="nav-link {{ request()->is('central/settings*') ? 'active' : '' }}" href="{{ route('central.settings.index') }}">
+                <i class="fa-solid fa-sliders"></i> Pengaturan Server & Sync
+            </a>
 
-            <div class="nav-header">Distribusi & Sinkronisasi</div>
+            <div class="nav-header">Distribusi & Realtime Sync</div>
             <a class="nav-link {{ request()->is('central/releases*') ? 'active' : '' }}" href="{{ route('central.releases.index') }}">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Rilis & Patch OTA
             </a>
@@ -137,11 +154,11 @@
     <div id="main-content">
         <header class="topbar">
             <div class="d-flex align-items-center gap-3">
-                <span class="badge bg-indigo text-white" style="background-color: #4f46e5;">
-                    <i class="fa-solid fa-circle me-1 text-success" style="font-size: 0.55rem;"></i> MASTER SERVER ONLINE
+                <span class="badge bg-indigo text-white d-flex align-items-center gap-2" style="background-color: #4f46e5;">
+                    <span class="pulse-indicator"></span> REAL-TIME ENGINE ACTIVE
                 </span>
                 <span class="text-muted small">
-                    <i class="fa-solid fa-network-wired me-1"></i> Port: 8090 • API Gateway Active
+                    <i class="fa-solid fa-network-wired me-1"></i> Port: 8090 • Central Cloud Database Connected
                 </span>
             </div>
 
@@ -154,6 +171,7 @@
                         <i class="fa-solid fa-user-shield text-indigo me-1"></i> Master Admin
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item" href="{{ route('central.settings.index') }}"><i class="fa-solid fa-sliders me-2"></i>Pengaturan Server</a></li>
                         <li><a class="dropdown-item" href="{{ route('central.dashboard') }}"><i class="fa-solid fa-server me-2"></i>Dashboard Pusat</a></li>
                         <li><a class="dropdown-item" href="{{ route('central.releases.index') }}"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Pusat Patch OTA</a></li>
                     </ul>

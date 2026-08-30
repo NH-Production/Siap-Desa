@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\CentralDevice;
 use App\Models\CentralLicense;
 use App\Models\CentralRelease;
+use App\Models\CentralServerSetting;
 use App\Models\CentralSyncLog;
 use App\Models\CentralVillage;
 use Illuminate\Database\Seeder;
@@ -14,10 +15,19 @@ class CentralServerSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Desa Sindangresmi (Tenant 1)
+        // 1. Central Server Settings
+        CentralServerSetting::set('supabase_url', 'https://siapdesa.supabase.co', 'Supabase Cloud REST URL');
+        CentralServerSetting::set('supabase_key', 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve', 'Supabase API Publishable Key');
+        CentralServerSetting::set('central_api_key', 'sb_publishable_UeCe6pqUTtRhBgLjpT1djA_anoXjXve', 'Central API Access Key');
+        CentralServerSetting::set('sync_interval_seconds', '30', 'Global Client Sync Interval (detik)');
+        CentralServerSetting::set('realtime_sync_enabled', '1', 'Aktifkan Realtime Push Sync');
+        CentralServerSetting::set('github_repo', 'NH-Production/Siap-Desa', 'GitHub Repository Identifier');
+
+        // 2. Desa Sindangresmi (Tenant 1)
         $v1 = CentralVillage::updateOrCreate(
             ['code' => '3203162002'],
             [
+                'client_id' => 'CLNT-3203162002-SINDANGRESMI',
                 'name' => 'Sindangresmi',
                 'district' => 'Takokak',
                 'regency' => 'Kabupaten Cianjur',
@@ -34,6 +44,7 @@ class CentralServerSeeder extends Seeder
             ['license_key' => 'SIAP-SAAS-3203-1620-02-2026'],
             [
                 'central_village_id' => $v1->id,
+                'locked_client_id' => $v1->client_id,
                 'tier' => 'ENTERPRISE',
                 'max_devices' => 10,
                 'issued_date' => '2026-01-01',
@@ -53,10 +64,11 @@ class CentralServerSeeder extends Seeder
             ]
         );
 
-        // 2. Desa Sukamaju (Tenant 2)
+        // 3. Desa Sukamaju (Tenant 2)
         $v2 = CentralVillage::updateOrCreate(
             ['code' => '3203162001'],
             [
+                'client_id' => 'CLNT-3203162001-SUKAMAJU',
                 'name' => 'Sukamaju Sejahtera',
                 'district' => 'Takokak',
                 'regency' => 'Kabupaten Cianjur',
@@ -73,6 +85,7 @@ class CentralServerSeeder extends Seeder
             ['license_key' => 'SIAP-SAAS-3203-STD-7712-2026'],
             [
                 'central_village_id' => $v2->id,
+                'locked_client_id' => $v2->client_id,
                 'tier' => 'STANDARD',
                 'max_devices' => 3,
                 'issued_date' => '2026-02-01',
@@ -82,7 +95,7 @@ class CentralServerSeeder extends Seeder
             ]
         );
 
-        // 3. Central Release v1.0.1
+        // 4. Central Release v1.0.1
         CentralRelease::updateOrCreate(
             ['version' => '1.0.1'],
             [
@@ -98,7 +111,7 @@ class CentralServerSeeder extends Seeder
             ]
         );
 
-        // 4. Sample Telemetry Log
+        // 5. Sample Telemetry Log
         CentralSyncLog::create([
             'village_code' => '3203162002',
             'device_code' => 'PC-ADMIN-01',

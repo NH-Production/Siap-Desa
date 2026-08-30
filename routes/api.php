@@ -6,10 +6,11 @@ use App\Http\Controllers\Api\CentralUpdateApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    // 1. License & Client Handshake
+    // 1. License & Client Auto-Configuration (Locks Client ID)
+    Route::post('/client/config', [CentralLicenseApiController::class, 'config'])->name('api.client.config');
     Route::post('/license/verify', [CentralLicenseApiController::class, 'verify'])->name('api.license.verify');
 
-    // 2. Delta Synchronization Ingestion
+    // 2. Real-time Delta Synchronization Ingestion
     Route::post('/sync/push', [CentralSyncApiController::class, 'push'])->name('api.sync.push');
     Route::get('/sync/pull', [CentralSyncApiController::class, 'pull'])->name('api.sync.pull');
 
