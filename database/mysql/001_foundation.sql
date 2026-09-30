@@ -1,73 +1,49 @@
 -- SIAP-DESA MySQL foundation schema
--- Target: MySQL 8.x / MariaDB 10.6+
+-- MySQL 8.x / MariaDB 10.6+
+-- Canonical schema used by Laravel models.
 
 CREATE TABLE IF NOT EXISTS villages (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
-  code VARCHAR(30) NULL,
+  code VARCHAR(30) NULL UNIQUE,
   name VARCHAR(150) NOT NULL,
   district VARCHAR(150) NULL,
   regency VARCHAR(150) NULL,
   province VARCHAR(150) NULL,
   postal_code VARCHAR(10) NULL,
   address TEXT NULL,
+  phone VARCHAR(40) NULL,
+  email VARCHAR(190) NULL,
+  website VARCHAR(255) NULL,
+  head_name VARCHAR(190) NULL,
+  secretary_name VARCHAR(190) NULL,
+  letter_number_format VARCHAR(255) NULL,
+  settings JSON NULL,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
   deleted_at DATETIME NULL
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS devices (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  uuid CHAR(36) NOT NULL UNIQUE,
-  village_uuid CHAR(36) NOT NULL,
-  device_name VARCHAR(150) NOT NULL,
-  device_token_hash VARCHAR(255) NULL,
-  app_version VARCHAR(30) NULL,
-  schema_version VARCHAR(30) NULL,
-  last_seen_at DATETIME NULL,
-  last_sync_at DATETIME NULL,
-  status ENUM('active','blocked','retired') NOT NULL DEFAULT 'active',
-  created_at DATETIME NOT NULL,
-  updated_at DATETIME NOT NULL,
-  UNIQUE KEY uq_device_village (village_uuid, uuid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS roles (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   name VARCHAR(80) NOT NULL UNIQUE,
+  display_name VARCHAR(150) NOT NULL,
   description VARCHAR(255) NULL,
+  is_system TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS users (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  uuid CHAR(36) NOT NULL UNIQUE,
-  village_uuid CHAR(36) NULL,
-  role_id BIGINT UNSIGNED NULL,
-  name VARCHAR(150) NOT NULL,
-  username VARCHAR(80) NOT NULL,
-  email VARCHAR(190) NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  status ENUM('active','inactive','blocked') NOT NULL DEFAULT 'active',
-  last_login_at DATETIME NULL,
-  created_at DATETIME NOT NULL,
-  updated_at DATETIME NOT NULL,
-  deleted_at DATETIME NULL,
-  UNIQUE KEY uq_user_username (username),
-  UNIQUE KEY uq_user_email (email),
-  CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS permissions (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
-  code VARCHAR(120) NOT NULL UNIQUE,
-  name VARCHAR(150) NOT NULL,
+  name VARCHAR(120) NOT NULL UNIQUE,
+  display_name VARCHAR(150) NOT NULL,
+  module VARCHAR(80) NULL,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS role_permissions (
   role_id BIGINT UNSIGNED NOT NULL,
@@ -75,7 +51,53 @@ CREATE TABLE IF NOT EXISTS role_permissions (
   PRIMARY KEY (role_id, permission_id),
   CONSTRAINT fk_rp_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
   CONSTRAINT fk_rp_permission FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL UNIQUE,
+  village_uuid CHAR(36) NULL,
+  name VARCHAR(150) NOT NULL,
+  username VARCHAR(80) NOT NULL UNIQUE,
+  email VARCHAR(190) NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  status ENUM('active','inactive','blocked') NOT NULL DEFAULT 'active',
+  last_login_at DATETIME NULL,
+  remember_token VARCHAR(100) NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  deleted_at DATETIME NULL,
+  KEY idx_users_village (village_uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_roles (
+  user_id BIGINT UNSIGNED NOT NULL,
+  role_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (user_id, role_id),
+  CONSTRAINT fk_ur_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ur_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS devices (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL UNIQUE,
+  village_uuid CHAR(36) NOT NULL,
+  device_code VARCHAR(80) NOT NULL UNIQUE,
+  name VARCHAR(150) NOT NULL,
+  device_token_hash VARCHAR(255) NULL,
+  app_version VARCHAR(30) NULL,
+  schema_version VARCHAR(30) NULL,
+  sync_protocol_version VARCHAR(30) NULL,
+  last_seen_at DATETIME NULL,
+  last_sync_at DATETIME NULL,
+  status ENUM('active','blocked','retired') NOT NULL DEFAULT 'active',
+  registered_at DATETIME NULL,
+  revoked_at DATETIME NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  KEY idx_devices_village_status (village_uuid, status),
+  CONSTRAINT fk_device_village FOREIGN KEY (village_uuid) REFERENCES villages(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS audit_logs (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -94,7 +116,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at DATETIME NOT NULL,
   KEY idx_audit_village_date (village_uuid, created_at),
   KEY idx_audit_record (table_name, record_uuid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS sync_queue (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -109,11 +131,12 @@ CREATE TABLE IF NOT EXISTS sync_queue (
   created_at DATETIME NOT NULL,
   synced_at DATETIME NULL,
   attempts INT UNSIGNED NOT NULL DEFAULT 0,
+  last_attempt_at DATETIME NULL,
   last_error TEXT NULL,
   status ENUM('PENDING','PROCESSING','SYNCED','FAILED','CONFLICT') NOT NULL DEFAULT 'PENDING',
   KEY idx_sync_pending (village_uuid, status, id),
   KEY idx_sync_record (table_name, record_uuid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS sync_checkpoints (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -124,7 +147,7 @@ CREATE TABLE IF NOT EXISTS sync_checkpoints (
   last_pull_at DATETIME NULL,
   updated_at DATETIME NOT NULL,
   UNIQUE KEY uq_checkpoint (village_uuid, device_uuid)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS sync_conflicts (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -142,7 +165,7 @@ CREATE TABLE IF NOT EXISTS sync_conflicts (
   resolved_at DATETIME NULL,
   created_at DATETIME NOT NULL,
   KEY idx_conflict_status (village_uuid, resolution, created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS system_settings (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -150,4 +173,4 @@ CREATE TABLE IF NOT EXISTS system_settings (
   setting_value TEXT NULL,
   is_secret TINYINT(1) NOT NULL DEFAULT 0,
   updated_at DATETIME NOT NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
