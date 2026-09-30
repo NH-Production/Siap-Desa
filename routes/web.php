@@ -22,6 +22,9 @@ use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\VillageController;
 use Illuminate\Support\Facades\Route;
 
+// System runtime version contract
+Route::get('/system/version', [\App\Http\Controllers\SystemController::class, 'version'])->name('system.version');
+
 // First Run Setup Wizard
 Route::prefix('setup')->name('setup.')->group(function () {
     Route::get('/', [FirstRunController::class, 'index'])->name('index');
