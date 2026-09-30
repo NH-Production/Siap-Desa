@@ -1,0 +1,39 @@
+name: SIAP-DESA CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/mysql-hybrid-local-first
+  pull_request:
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, dom, xml, curl
+          coverage: none
+
+      - name: Validate composer
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP syntax check
+        run: |
+          find app config routes database -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Laravel bootstrap check
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          php artisan about
