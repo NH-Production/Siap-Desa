@@ -15,7 +15,7 @@ class User extends Authenticatable
     protected $guarded = ['id'];
 
     protected $hidden = [
-        'password',
+        'password_hash',
         'remember_token',
     ];
 
@@ -49,6 +49,6 @@ class User extends Authenticatable
 
     public function village()
     {
-        return $this->belongsTo(Village::class, 'village_id', 'uuid');
+        return $this->belongsTo(Village::class, 'village_uuid', 'uuid');
     }
 }
