@@ -44,13 +44,14 @@ class DeviceIdentityService
         return Device::query()->updateOrCreate(
             ['uuid' => $uuid],
             [
-                'village_id' => $villageUuid ?: config('siapdesa.village_uuid'),
+                'village_uuid' => $villageUuid ?: config('siapdesa.village_uuid'),
                 'name' => gethostname() ?: 'SIAP-DESA-PC',
                 'device_code' => 'DEV-' . strtoupper(substr(str_replace('-', '', $uuid), 0, 12)),
                 'app_version' => config('siapdesa.version', '1.0.0'),
                 'schema_version' => (int) config('siapdesa.schema_version', 1),
                 'sync_protocol_version' => (int) config('siapdesa.sync_protocol_version', 1),
-                'status' => 'ACTIVE',
+                'status' => 'active',
+                'registered_at' => now(),
                 'last_seen_at' => now(),
             ]
         );
