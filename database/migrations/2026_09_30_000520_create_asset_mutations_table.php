@@ -1,0 +1,3 @@
+<?php
+use IlluminateDatabaseMigrationsMigration;use IlluminateDatabaseSchemaBlueprint;use IlluminateSupportFacadesSchema;
+return new class extends Migration{public function up():void{Schema::create('asset_mutations',function(Blueprint $t){$t->id();$t->uuid('uuid')->unique();$t->foreignId('asset_id')->constrained('assets')->cascadeOnDelete();$t->enum('mutation_type',['PINDAH_LOKASI','PERUBAHAN_KONDISI','PENGHAPUSAN','PERUBAHAN_PENGUASA'])->index();$t->string('previous_value',255)->nullable();$t->string('new_value',255);$t->date('date');$t->text('reason');$t->unsignedBigInteger('version')->default(1);$t->timestamps();});}public function down():void{Schema::dropIfExists('asset_mutations');}};
