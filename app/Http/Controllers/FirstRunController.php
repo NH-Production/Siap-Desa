@@ -6,11 +6,11 @@ use App\Models\Device;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Village;
+use App\Services\DeviceIdentityService;
 use Database\Seeders\MasterDataSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class FirstRunController extends Controller
 {
@@ -19,10 +19,11 @@ class FirstRunController extends Controller
         if (Village::count() > 0 && User::count() > 0) {
             return redirect()->route('dashboard');
         }
+
         return view('setup.wizard');
     }
 
-    public function store(Request $request)
+    public function store(Request $request, DeviceIdentityService $identity)
     {
         $validated = $request->validate([
             'village_name' => 'required|string|max:150',
@@ -37,13 +38,9 @@ class FirstRunController extends Controller
             'device_name' => 'required|string|max:100',
         ]);
 
-        // Seed default master roles & data
-        $seeder1 = new RolePermissionSeeder();
-        $seeder1->run();
-        $seeder2 = new MasterDataSeeder();
-        $seeder2->run();
+        (new RolePermissionSeeder())->run();
+        (new MasterDataSeeder())->run();
 
-        // Create Village
         $village = Village::create([
             'code' => $validated['village_code'],
             'name' => $validated['village_name'],
@@ -54,31 +51,37 @@ class FirstRunController extends Controller
             'letter_number_format' => '{KODE}/{NO}/DS/{BULAN_ROMAWI}/{TAHUN}',
         ]);
 
-        // Create Device
-        $device = Device::create([
-            'village_id' => $village->uuid,
-            'name' => $validated['device_name'],
-            'device_code' => 'DEV-' . strtoupper(Str::random(8)),
-            'status' => 'ACTIVE',
-            'registered_at' => now(),
-            'last_seen_at' => now(),
-        ]);
+        Device::updateOrCreate(
+            ['uuid' => $identity->uuid()],
+            [
+                'village_id' => $village->uuid,
+                'name' => $validated['device_name'],
+                'device_code' => 'DEV-' . strtoupper(substr(str_replace('-', '', $identity->uuid()), 0, 12)),
+                'status' => 'ACTIVE',
+                'registered_at' => now(),
+                'last_seen_at' => now(),
+                'app_version' => config('siapdesa.version', '1.0.0'),
+                'schema_version' => (int) config('siapdesa.schema_version', 1),
+                'sync_protocol_version' => (int) config('siapdesa.sync_protocol_version', 1),
+            ]
+        );
 
-        // Create Admin User
-        $superAdminRole = Role::where('name', 'superadmin')->first();
+        $superAdminRole = Role::where('name', 'superadmin')->firstOrFail();
+
         $user = User::create([
             'village_id' => $village->uuid,
             'name' => $validated['admin_name'],
             'username' => $validated['admin_username'],
-            'email' => 'admin@' . Str::slug($validated['village_name']) . '.desa.id',
+            'email' => 'admin@' . str_replace(' ', '-', strtolower($validated['village_name'])) . '.local',
             'password' => Hash::make($validated['admin_password']),
             'status' => 'ACTIVE',
         ]);
 
-        if ($superAdminRole) {
-            $user->roles()->sync([$superAdminRole->id]);
-        }
+        $user->roles()->sync([$superAdminRole->id]);
 
-        return redirect()->route('login')->with('success', 'Konfigurasi awal desa berhasil! Silakan masuk dengan akun Administrator yang baru dibuat.');
+        return redirect()->route('login')->with(
+            'success',
+            'Konfigurasi awal desa berhasil. Silakan masuk dengan akun Administrator yang baru dibuat.'
+        );
     }
 }
