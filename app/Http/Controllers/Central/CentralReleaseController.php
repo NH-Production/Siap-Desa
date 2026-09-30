@@ -18,46 +18,40 @@ class CentralReleaseController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'version' => 'required|string|unique:central_releases,version',
-            'schema_version' => 'required|integer',
-            'title' => 'required|string|max:150',
-            'changelog' => 'required|string',
-            'patch_file' => 'nullable|file|mimes:zip,pkg|max:102400',
+        $data = $request->validate([
+            'version' => ['required','regex:/^\d+\.\d+\.\d+$/','unique:central_releases,version'],
+            'minimum_version' => ['required','regex:/^\d+\.\d+\.\d+$/'],
+            'schema_version' => ['required','integer','min:1'],
+            'sync_protocol' => ['required','integer','min:1'],
+            'title' => ['required','string','max:150'],
+            'changelog' => ['required','string'],
+            'patch_file' => ['required','file','mimes:zip','max:512000'],
         ]);
 
-        $filePath = null;
-        $fileName = null;
-        $fileSize = 0;
-        $checksum = null;
+        $file = $request->file('patch_file');
+        $fileName = 'SIAP-DESA-Patch-'.$data['version'].'.zip';
+        $destDir = public_path('downloads/patches');
+        File::ensureDirectoryExists($destDir);
+        $destPath = $destDir.'/'.$fileName;
+        $file->move($destDir, $fileName);
 
-        if ($request->hasFile('patch_file')) {
-            $file = $request->file('patch_file');
-            $fileName = "SIAP_Desa_Patch_v{$request->version}.zip";
-            $destDir = public_path('downloads/patches');
-            File::ensureDirectoryExists($destDir);
-            $destPath = $destDir . '/' . $fileName;
-            $file->move($destDir, $fileName);
-
-            $filePath = 'downloads/patches/' . $fileName;
-            $fileSize = File::size($destPath);
-            $checksum = hash_file('sha256', $destPath);
-        }
-
-        CentralRelease::create([
-            'version' => $request->version,
-            'schema_version' => $request->schema_version,
-            'title' => $request->title,
-            'changelog' => $request->changelog,
-            'file_path' => $filePath,
+        $release = CentralRelease::create([
+            'uuid' => (string) Str::uuid(),
+            'version' => $data['version'],
+            'minimum_version' => $data['minimum_version'],
+            'schema_version' => $data['schema_version'],
+            'sync_protocol' => $data['sync_protocol'],
+            'title' => $data['title'],
+            'changelog' => $data['changelog'],
+            'file_path' => 'downloads/patches/'.$fileName,
             'file_name' => $fileName,
-            'file_size' => $fileSize,
-            'checksum_sha256' => $checksum,
+            'file_size' => File::size($destPath),
+            'checksum_sha256' => hash_file('sha256', $destPath),
             'is_mandatory' => $request->boolean('is_mandatory'),
-            'is_published' => true,
+            'is_published' => $request->boolean('is_published', true),
             'release_date' => now(),
         ]);
 
-        return back()->with('success', "Versi rilis v{$request->version} berhasil dipublikasikan untuk seluruh klien desa!");
+        return back()->with('success', 'Rilis '.$release->version.' berhasil dipublikasikan.');
     }
 }
