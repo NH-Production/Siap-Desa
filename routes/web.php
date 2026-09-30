@@ -52,12 +52,12 @@ Route::middleware(['auth', 'first_run'])->group(function () {
         Route::get('/', [CitizenController::class, 'index'])->name('index');
         Route::get('/create', [CitizenController::class, 'create'])->name('create');
         Route::post('/store', [CitizenController::class, 'store'])->name('store');
+        Route::post('/import', [CitizenController::class, 'import'])->name('import');
+        Route::get('/export/csv', [CitizenController::class, 'exportCsv'])->name('export.csv');
         Route::get('/{uuid}', [CitizenController::class, 'show'])->name('show');
         Route::get('/{uuid}/edit', [CitizenController::class, 'edit'])->name('edit');
         Route::put('/{uuid}', [CitizenController::class, 'update'])->name('update');
         Route::delete('/{uuid}', [CitizenController::class, 'destroy'])->name('destroy');
-        Route::post('/import', [CitizenController::class, 'import'])->name('import');
-        Route::get('/export/csv', [CitizenController::class, 'exportCsv'])->name('export.csv');
     });
 
     // Families (KK)
