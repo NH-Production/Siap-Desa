@@ -1,0 +1,10 @@
+{
+  "product": "SIAP-DESA",
+  "version": "1.0.1",
+  "minimum_version": "1.0.0",
+  "schema_version": 2,
+  "sync_protocol_version": 1,
+  "mandatory": false,
+  "entrypoint": "scripts/apply-patch.ps1",
+  "checksum_sha256": ""
+}
