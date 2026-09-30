@@ -25,6 +25,7 @@ class AidController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'year' => 'required|integer',
+            'code' => 'required|string|max:50',
             'budget_per_recipient' => 'required|numeric|min:0',
             'quota' => 'required|integer|min:1',
             'source' => 'required|string',
@@ -33,6 +34,7 @@ class AidController extends Controller
 
         $village = Village::first();
         $validated['village_id'] = $village->uuid ?? Str::uuid()->toString();
+        $validated['status'] = 'DRAFT';
 
         $prog = AidProgram::create($validated);
 
@@ -69,7 +71,8 @@ class AidController extends Controller
     public function markDistributed(Request $request, $uuid)
     {
         $recipient = AidRecipient::where('uuid', $uuid)->firstOrFail();
-        $recipient->update([
+        $request->validate(['distribution_reference'=>'nullable|string|max:100']);
+        $recipient->update(['distribution_reference'=>$request->input('distribution_reference'),
             'status' => 'DISALURKAN',
             'distribution_date' => now()->toDateString(),
         ]);
