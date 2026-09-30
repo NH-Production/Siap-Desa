@@ -190,7 +190,7 @@ Route::middleware(['auth', 'first_run'])->group(function () {
 });
 
 // Central Cloud Server Management Panel Routes
-Route::prefix('central')->name('central.')->group(function () {
+Route::middleware(['auth'])->prefix('central')->name('central.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Central\CentralDashboardController::class, 'index'])->name('dashboard');
     Route::prefix('villages')->name('villages.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Central\CentralVillageController::class, 'index'])->name('index');
@@ -201,6 +201,12 @@ Route::prefix('central')->name('central.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Central\CentralLicenseController::class, 'index'])->name('index');
         Route::post('/store', [\App\Http\Controllers\Central\CentralLicenseController::class, 'store'])->name('store');
         Route::post('/{uuid}/toggle', [\App\Http\Controllers\Central\CentralLicenseController::class, 'toggleStatus'])->name('toggle');
+    });
+    Route::prefix('devices')->name('devices.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Central\CentralDeviceController::class, 'index'])->name('index');
+        Route::post('/register', [\App\Http\Controllers\Central\CentralDeviceController::class, 'register'])->name('register');
+        Route::post('/{device}/toggle', [\App\Http\Controllers\Central\CentralDeviceController::class, 'toggle'])->name('toggle');
+        Route::post('/{device}/retire', [\App\Http\Controllers\Central\CentralDeviceController::class, 'retire'])->name('retire');
     });
     Route::prefix('releases')->name('releases.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Central\CentralReleaseController::class, 'index'])->name('index');
