@@ -1,0 +1,15 @@
+{
+  "product": "SIAP-DESA",
+  "channel": "stable",
+  "version": "1.0.1",
+  "minimum_version": "1.0.0",
+  "schema_version": "1.0.1",
+  "sync_protocol": "1.0",
+  "package": "SIAP-DESA-Patch-1.0.1.exe",
+  "sha256": "REPLACE_WITH_RELEASE_SHA256",
+  "mandatory": false,
+  "release_notes": [
+    "Contoh patch aplikasi.",
+    "Tidak menghapus data lokal."
+  ]
+}

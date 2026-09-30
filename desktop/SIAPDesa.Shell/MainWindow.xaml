@@ -1,0 +1,10 @@
+<Window x:Class="SIAPDesa.Shell.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SIAP-DESA"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
+    <Grid>
+        <WebView2 x:Name="Browser" />
+    </Grid>
+</Window>
