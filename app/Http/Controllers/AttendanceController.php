@@ -25,6 +25,7 @@ class AttendanceController extends Controller
 
     public function scanSubmit(Request $request){
         $request->validate(['qr_token'=>'required|string|max:100']);
+        // The scanner is intentionally local-first: no cloud request is required here.
         $employee=Employee::where('qr_token',trim($request->qr_token))->where('is_active',true)->first();
         if(!$employee)return response()->json(['success'=>false,'message'=>'Kartu QR tidak dikenali atau pegawai tidak aktif.'],404);
         $now=Carbon::now();$today=$now->toDateString();$time=$now->format('H:i:s');
