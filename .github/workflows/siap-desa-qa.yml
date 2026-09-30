@@ -1,0 +1,35 @@
+name: SIAP-DESA QA
+
+on:
+  push:
+    branches: ["feature/mysql-hybrid-local-first", "main"]
+  pull_request:
+
+jobs:
+  php-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo_mysql, dom, fileinfo, curl, openssl
+          coverage: none
+
+      - name: Validate Composer
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP syntax check
+        shell: bash
+        run: |
+          set -e
+          find app routes bootstrap config database/seeders -type f -name "*.php" -print0 |
+            xargs -0 -n1 php -l
+
+      - name: Laravel bootstrap check
+        run: php artisan about
