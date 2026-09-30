@@ -12,6 +12,7 @@
         <a href="{{ route('citizens.export.csv') }}" class="btn btn-outline-success btn-sm">
             <i class="fa-solid fa-file-excel me-1"></i> Export CSV
         </a>
+        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal"><i class="fa-solid fa-file-import me-1"></i> Import CSV</button>
         <a href="{{ route('citizens.create') }}" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-user-plus me-1"></i> Tambah Penduduk
         </a>
@@ -106,4 +107,5 @@
         {{ $citizens->links('pagination::bootstrap-5') }}
     </div>
 </div>
+<div class="modal fade" id="importModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="POST" action="{{ route('citizens.import') }}" enctype="multipart/form-data">@csrf<div class="modal-header"><h5 class="modal-title">Import Penduduk CSV</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="file" name="file" class="form-control" accept=".csv,.txt" required><small class="text-muted">Kolom mengikuti format hasil Export CSV SIAP-DESA.</small></div><div class="modal-footer"><button class="btn btn-primary">Import</button></div></form></div></div></div>
 @endsection
