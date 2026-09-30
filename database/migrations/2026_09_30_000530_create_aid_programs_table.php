@@ -1,0 +1,3 @@
+<?php
+use IlluminateDatabaseMigrationsMigration;use IlluminateDatabaseSchemaBlueprint;use IlluminateSupportFacadesSchema;
+return new class extends Migration{public function up():void{Schema::create('aid_programs',function(Blueprint $t){$t->id();$t->uuid('uuid')->unique();$t->uuid('village_id')->index();$t->string('code',50)->unique();$t->string('name',150);$t->unsignedSmallInteger('year');$t->string('source',100);$t->decimal('budget_per_recipient',18,2);$t->unsignedInteger('quota');$t->enum('status',['DRAFT','ACTIVE','CLOSED'])->default('DRAFT')->index();$t->text('description')->nullable();$t->unsignedBigInteger('version')->default(1);$t->timestamps();$t->softDeletes();});}public function down():void{Schema::dropIfExists('aid_programs');}};
