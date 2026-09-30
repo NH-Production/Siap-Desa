@@ -51,5 +51,7 @@
             </a>
         </div>
     </div>
+    <div class="col-md-3"><div class="card p-4 text-center h-100"><i class="fa-solid fa-hand-holding-heart fa-3x text-danger mb-3"></i><h5 class="fw-bold">Laporan Bansos</h5><p class="text-muted small">Rekap program, kuota, penerima dan penyaluran bantuan.</p><a href="{{ route('reports.aid') }}" class="btn btn-danger btn-sm mt-auto" target="_blank">Buka Laporan</a></div></div>
+    <div class="col-md-3"><div class="card p-4 text-center h-100"><i class="fa-solid fa-envelope-open-text fa-3x text-secondary mb-3"></i><h5 class="fw-bold">Laporan Persuratan</h5><p class="text-muted small">Rekap surat berdasarkan periode dan status.</p><a href="{{ route('reports.letters') }}" class="btn btn-secondary btn-sm mt-auto" target="_blank">Buka Laporan</a></div></div>
 </div>
 @endsection
