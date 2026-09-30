@@ -123,6 +123,9 @@ Route::middleware(['auth', 'first_run'])->group(function () {
         Route::get('/budgets', [FinanceController::class, 'budgets'])->name('budgets');
         Route::post('/budgets', [FinanceController::class, 'storeBudget'])->name('budgets.store');
         Route::get('/spj', [FinanceController::class, 'spjReport'])->name('spj');
+        Route::get('/spj/create', [FinanceController::class, 'createSpj'])->name('spj.create');
+        Route::post('/spj', [FinanceController::class, 'storeSpj'])->name('spj.store');
+        Route::post('/spj/{uuid}/resolve', [FinanceController::class, 'resolveSpj'])->name('spj.resolve');
     });
 
     // Assets & Inventaris
