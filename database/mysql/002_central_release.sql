@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS central_releases (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  uuid CHAR(36) NOT NULL,
+  version VARCHAR(30) NOT NULL,
+  minimum_version VARCHAR(30) NOT NULL,
+  schema_version INT UNSIGNED NOT NULL,
+  sync_protocol INT UNSIGNED NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  changelog LONGTEXT NOT NULL,
+  file_path VARCHAR(500) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_size BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  checksum_sha256 CHAR(64) NOT NULL,
+  is_mandatory TINYINT(1) NOT NULL DEFAULT 0,
+  is_published TINYINT(1) NOT NULL DEFAULT 1,
+  release_date DATETIME NOT NULL,
+  created_at DATETIME NULL,
+  updated_at DATETIME NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY central_releases_uuid_unique (uuid),
+  UNIQUE KEY central_releases_version_unique (version),
+  KEY central_releases_published_idx (is_published, release_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
