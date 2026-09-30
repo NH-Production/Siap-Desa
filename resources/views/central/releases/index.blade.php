@@ -4,93 +4,37 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="fw-bold mb-1">Pusat Rilis & Distribusi Patch OTA</h4>
-        <p class="text-muted small mb-0">Publikasi versi update baru untuk didownload otomatis oleh seluruh klien desktop desa.</p>
-    </div>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#publishReleaseModal">
-        <i class="fa-solid fa-cloud-arrow-up me-1"></i> Publikasikan Rilis Baru
-    </button>
+    <div><h4 class="fw-bold mb-1">Pusat Rilis & Patch</h4><p class="text-muted small mb-0">Kelola paket update desktop SIAP-DESA.</p></div>
 </div>
-
+@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
 <div class="card">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead class="table-light small">
-                <tr>
-                    <th>Versi</th>
-                    <th>Judul Rilis</th>
-                    <th>Catatan Perubahan (Changelog)</th>
-                    <th>Ukuran File</th>
-                    <th>Tanggal Rilis</th>
-                    <th>Status OTA</th>
-                </tr>
-            </thead>
-            <tbody class="small">
-                @forelse($releases as $rel)
-                <tr>
-                    <td><span class="badge bg-primary fs-6">v{{ $rel->version }}</span></td>
-                    <td class="fw-bold">{{ $rel->title }}</td>
-                    <td>{{ Str::limit($rel->changelog, 60) }}</td>
-                    <td>{{ $rel->file_size ? number_format($rel->file_size / 1024, 1) . ' KB' : '-' }}</td>
-                    <td>{{ $rel->release_date->format('d/m/Y') }}</td>
-                    <td>
-                        <span class="badge bg-success"><i class="fa-solid fa-broadcast-tower me-1"></i> Live OTA</span>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">Belum ada versi rilis OTA dipublikasikan.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+<div class="table-responsive"><table class="table table-hover mb-0 align-middle">
+<thead><tr><th>Versi</th><th>Minimum</th><th>Schema</th><th>Sync</th><th>File</th><th>SHA-256</th><th>Status</th></tr></thead>
+<tbody>
+@forelse($releases as $rel)
+<tr>
+<td><span class="badge bg-primary">v{{ $rel->version }}</span><div class="small">{{ $rel->title }}</div></td>
+<td>{{ $rel->minimum_version }}</td><td>{{ $rel->schema_version }}</td><td>{{ $rel->sync_protocol }}</td>
+<td>{{ $rel->file_name ?: '-' }}<br><small>{{ $rel->file_size ? number_format($rel->file_size/1048576,2).' MB' : '-' }}</small></td>
+<td><code class="small">{{ $rel->checksum_sha256 ?: '-' }}</code></td>
+<td>{!! $rel->is_mandatory ? '<span class="badge bg-danger">MANDATORY</span>' : '<span class="badge bg-success">OPTIONAL</span>' !!}</td>
+</tr>
+@empty <tr><td colspan="7" class="text-center py-4 text-muted">Belum ada rilis.</td></tr>@endforelse
+</tbody></table></div>
+<div class="card-footer">{{ $releases->links() }}</div></div>
 
-<!-- Modal Publish Release -->
-<div class="modal fade" id="publishReleaseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="{{ route('central.releases.store') }}" method="POST" enctype="multipart/form-data" class="modal-content">
-            @csrf
-            <div class="modal-header">
-                <h5 class="modal-title fs-6 fw-bold"><i class="fa-solid fa-cloud-arrow-up me-2 text-primary"></i>Publikasikan Rilis Patch Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="form-label small fw-semibold">Versi Rilis *</label>
-                        <input type="text" name="version" class="form-control form-control-sm" required placeholder="Contoh: 1.0.2">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label small fw-semibold">Schema Version *</label>
-                        <input type="number" name="schema_version" class="form-control form-control-sm" value="2" required>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Judul Rilis *</label>
-                    <input type="text" name="title" class="form-control form-control-sm" required placeholder="Contoh: Pembaruan Modul dan Perbaikan Performa">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Catatan Perubahan (Changelog) *</label>
-                    <textarea name="changelog" class="form-control form-control-sm" rows="3" required placeholder="Tuliskan daftar fitur baru atau bugfix pada rilis ini..."></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Upload File Paket Patch (*.zip) *</label>
-                    <input type="file" name="patch_file" class="form-control form-control-sm" accept=".zip,.pkg">
-                    <small class="text-muted">File paket patch yang digenerate dari build_patch.ps1</small>
-                </div>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" name="is_mandatory" value="1" id="isMandatory">
-                    <label class="form-check-label small" for="isMandatory">Wajibkan Update (Mandatory)</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary btn-sm">Publikasikan ke Seluruh Klien</button>
-            </div>
-        </form>
-    </div>
-</div>
+<div class="card mt-4">
+<div class="card-body">
+<form action="{{ route('central.releases.store') }}" method="POST" enctype="multipart/form-data" class="row g-3">
+@csrf
+<div class="col-md-2"><label class="form-label">Version</label><input name="version" class="form-control" placeholder="1.0.1" required></div>
+<div class="col-md-2"><label class="form-label">Minimum</label><input name="minimum_version" class="form-control" placeholder="1.0.0" required></div>
+<div class="col-md-2"><label class="form-label">Schema</label><input name="schema_version" type="number" class="form-control" value="1" required></div>
+<div class="col-md-2"><label class="form-label">Sync Protocol</label><input name="sync_protocol" type="number" class="form-control" value="1" required></div>
+<div class="col-md-4"><label class="form-label">Judul</label><input name="title" class="form-control" required></div>
+<div class="col-md-8"><label class="form-label">Changelog</label><textarea name="changelog" class="form-control" rows="2" required></textarea></div>
+<div class="col-md-4"><label class="form-label">Patch ZIP</label><input name="patch_file" type="file" accept=".zip" class="form-control" required></div>
+<div class="col-12 form-check ms-2"><input name="is_mandatory" value="1" type="checkbox" class="form-check-input" id="mandatory"><label for="mandatory" class="form-check-label">Mandatory Update</label></div>
+<div class="col-12"><button class="btn btn-primary">Publikasikan Patch</button></div>
+</form></div></div>
 @endsection
