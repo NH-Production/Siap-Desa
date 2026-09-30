@@ -153,6 +153,9 @@ Route::middleware(['auth', 'first_run'])->group(function () {
         Route::get('/finance', [ReportController::class, 'financeReport'])->name('finance');
         Route::get('/attendance', [ReportController::class, 'attendanceReport'])->name('attendance');
         Route::get('/assets', [ReportController::class, 'assetsReport'])->name('assets');
+        Route::get('/aid', [ReportController::class, 'aidReport'])->name('aid');
+        Route::get('/letters', [ReportController::class, 'lettersReport'])->name('letters');
+        Route::get('/pdf/{type}', [ReportController::class, 'pdf'])->name('pdf');
     });
 
     // Sync Center & Conflict Center
