@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             MasterDataSeeder::class,
             SampleVillageSeeder::class,
             LetterAndServiceSeeder::class,
+            AssetAidSeeder::class,
         ]);
     }
 }
