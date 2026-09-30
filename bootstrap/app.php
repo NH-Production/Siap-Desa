@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
             'first_run' => \App\Http\Middleware\CheckFirstRun::class,
+            'device.auth' => \App\Http\Middleware\CentralDeviceAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
