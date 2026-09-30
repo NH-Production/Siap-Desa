@@ -94,6 +94,8 @@ Route::middleware(['auth', 'first_run'])->group(function () {
         Route::post('/correction/{uuid}/resolve', [AttendanceController::class, 'resolveCorrection'])->name('correction.resolve');
     });
 
+    Route::get('/verify/letter/{token}', [LetterController::class, 'verify'])->name('letters.verify');
+
     // Letters & Services
     Route::prefix('letters')->name('letters.')->group(function () {
         Route::get('/', [LetterController::class, 'index'])->name('index');
