@@ -1,0 +1,3 @@
+<?php
+use IlluminateDatabaseMigrationsMigration;use IlluminateDatabaseSchemaBlueprint;use IlluminateSupportFacadesSchema;
+return new class extends Migration{public function up():void{Schema::create('asset_categories',function(Blueprint $t){$t->id();$t->uuid('uuid')->unique();$t->string('code',30)->unique();$t->string('name',120);$t->boolean('is_active')->default(true);$t->unsignedBigInteger('version')->default(1);$t->timestamps();$t->softDeletes();});}public function down():void{Schema::dropIfExists('asset_categories');}};
