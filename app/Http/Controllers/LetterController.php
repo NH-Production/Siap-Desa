@@ -142,7 +142,13 @@ class LetterController extends Controller
     }
 
     public function verify(string $token)
-    {\n        $letter = Letter::with('letterType')->where('qr_verification_token', $token)->where('status','APPROVED')->first();\n        if (!$letter) abort(404);\n        return view('letters.verify', compact('letter'));\n    }\n\n    public function destroy($uuid)
+    {
+        $letter = Letter::with('letterType')->where('qr_verification_token', $token)->where('status','APPROVED')->first();
+        if (!$letter) abort(404);
+        return view('letters.verify', compact('letter'));
+    }
+
+    public function destroy($uuid)
     {
         $letter = Letter::where('uuid', $uuid)->firstOrFail();
         $letter->delete();
