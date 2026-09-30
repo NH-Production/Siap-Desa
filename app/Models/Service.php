@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    use HasUuid;
+    use HasUuid, \App\Traits\Syncable;
 
     protected $guarded = ['id'];
 
