@@ -2,22 +2,15 @@
 
 namespace App\Models;
 
-use App\Traits\HasUuid;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Model;
 
 class FamilyMember extends Model
 {
-    use HasUuid;
+    use Syncable;
 
     protected $guarded = ['id'];
 
-    public function family()
-    {
-        return $this->belongsTo(Family::class);
-    }
-
-    public function citizen()
-    {
-        return $this->belongsTo(Citizen::class);
-    }
+    public function family() { return $this->belongsTo(Family::class); }
+    public function citizen() { return $this->belongsTo(Citizen::class); }
 }
