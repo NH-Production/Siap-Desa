@@ -54,10 +54,10 @@ class FirstRunController extends Controller
         Device::updateOrCreate(
             ['uuid' => $identity->uuid()],
             [
-                'village_id' => $village->uuid,
+                'village_uuid' => $village->uuid,
                 'name' => $validated['device_name'],
                 'device_code' => 'DEV-' . strtoupper(substr(str_replace('-', '', $identity->uuid()), 0, 12)),
-                'status' => 'ACTIVE',
+                'status' => 'active',
                 'registered_at' => now(),
                 'last_seen_at' => now(),
                 'app_version' => config('siapdesa.version', '1.0.0'),
@@ -73,8 +73,8 @@ class FirstRunController extends Controller
             'name' => $validated['admin_name'],
             'username' => $validated['admin_username'],
             'email' => 'admin@' . str_replace(' ', '-', strtolower($validated['village_name'])) . '.local',
-            'password' => Hash::make($validated['admin_password']),
-            'status' => 'ACTIVE',
+            'password_hash' => Hash::make($validated['admin_password']),
+            'status' => 'active'
         ]);
 
         $user->roles()->sync([$superAdminRole->id]);
