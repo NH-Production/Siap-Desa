@@ -10,7 +10,6 @@ use App\Models\Village;
 use App\Services\Audit\AuditService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
