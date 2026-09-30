@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\FinanceAccount;
 use App\Models\FinanceBudget;
 use App\Models\FinanceTransaction;
+use App\Models\Spj;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Village;
 use App\Services\Audit\AuditService;
 use Carbon\Carbon;
@@ -62,6 +64,8 @@ class FinanceController extends Controller
         $validated['transaction_number'] = $trxNumber;
         $validated['status'] = 'POSTED';
 
+        $validated['posted_by'] = Auth::id();
+        $validated['posted_at'] = now();
         $trx = FinanceTransaction::create($validated);
 
         AuditService::log('CREATE', 'finance_transactions', $trx->uuid, null, $trx->toArray());
@@ -124,7 +128,7 @@ class FinanceController extends Controller
         return back()->with('success', "Anggaran APBDes Tahun {$year} berhasil disimpan.");
     }
 
-    public function spjReport(Request $request)
+    public function createSpj(Request $request)\n    {\n        $transaction = FinanceTransaction::with('account')->where('id',$request->input('transaction_id'))->firstOrFail();\n        return view('finance.spj-create', compact('transaction'));\n    }\n\n    public function storeSpj(Request $request)\n    {\n        $data=$request->validate(['transaction_id'=>'required|exists:finance_transactions,id','date'=>'required|date','activity_name'=>'required|string|max:200','description'=>'nullable|string']);\n        $data['village_id']=Village::first()?->uuid; $data['spj_number']='SPJ-'.date('Y').'-'.str_pad((string)(Spj::whereYear('date',date('Y'))->count()+1),4,'0',STR_PAD_LEFT); $data['status']='SUBMITTED'; $data['prepared_by']=Auth::id();\n        $spj=Spj::create($data); FinanceTransaction::whereKey($data['transaction_id'])->update(['spj_number'=>$spj->spj_number]);\n        AuditService::log('CREATE','spj',$spj->uuid,null,$spj->toArray());\n        return redirect()->route('finance.spj')->with('success','SPJ berhasil dibuat.');\n    }\n\n    public function resolveSpj(Request $request,string $uuid)\n    {\n        $spj=Spj::where('uuid',$uuid)->firstOrFail(); $status=$request->input('status');\n        abort_unless(in_array($status,['VERIFIED','REJECTED'],true),422); $spj->update(['status'=>$status,'verified_by'=>Auth::id(),'verified_at'=>now()]);\n        return back()->with('success','Status SPJ diperbarui.');\n    }\n\n    public function spjReport(Request $request)
     {
         $transactions = FinanceTransaction::with('account')->whereNotNull('spj_number')->latest()->get();
         return view('finance.spj', compact('transactions'));
