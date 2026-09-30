@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             MasterDataSeeder::class,
             SampleVillageSeeder::class,
+            LetterAndServiceSeeder::class,
         ]);
     }
 }
