@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "type":"object",
+  "required":["product","version","minimum_version","package","sha256","release_date"],
+  "properties":{
+    "product":{"const":"SIAP-DESA"},
+    "version":{"type":"string"},
+    "minimum_version":{"type":"string"},
+    "package":{"type":"string"},
+    "sha256":{"type":"string","minLength":64,"maxLength":64},
+    "release_date":{"type":"string"},
+    "database_schema":{"type":"string"},
+    "sync_protocol":{"type":"string"},
+    "mandatory":{"type":"boolean"}
+  }
+}
