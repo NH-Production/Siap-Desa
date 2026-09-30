@@ -1,125 +1,16 @@
 @extends('layouts.app')
-
-@section('title', 'Tambah Penduduk')
-
+@section('title','Tambah Penduduk')
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="fw-bold mb-1">Tambah Data Penduduk</h4>
-        <p class="text-muted small mb-0">Masukkan biodata warga desa sesuai KTP / Kartu Keluarga.</p>
-    </div>
-    <a href="{{ route('citizens.index') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-</div>
-
-<div class="card">
-    <form action="{{ route('citizens.store') }}" method="POST" class="card-body p-4">
-        @csrf
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label small fw-semibold">Nomor Induk Kependudukan (NIK) *</label>
-                <input type="text" name="nik" class="form-control" maxlength="16" required placeholder="16 digit NIK" value="{{ old('nik') }}">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label small fw-semibold">Nomor Kartu Keluarga (No. KK)</label>
-                <input type="text" name="no_kk" class="form-control" maxlength="16" placeholder="16 digit No. KK" value="{{ old('no_kk') }}">
-            </div>
-
-            <div class="col-md-8">
-                <label class="form-label small fw-semibold">Nama Lengkap Sesuai KTP *</label>
-                <input type="text" name="name" class="form-control" required placeholder="Nama Lengkap" value="{{ old('name') }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label small fw-semibold">Jenis Kelamin *</label>
-                <select name="gender" class="form-select" required>
-                    <option value="LAKI_LAKI" {{ old('gender') == 'LAKI_LAKI' ? 'selected' : '' }}>Laki-laki</option>
-                    <option value="PEREMPUAN" {{ old('gender') == 'PEREMPUAN' ? 'selected' : '' }}>Perempuan</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label small fw-semibold">Tempat Lahir</label>
-                <input type="text" name="birth_place" class="form-control" placeholder="Kota / Kab. Lahir" value="{{ old('birth_place') }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label small fw-semibold">Tanggal Lahir</label>
-                <input type="date" name="birth_date" class="form-control" value="{{ old('birth_date') }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label small fw-semibold">Golongan Darah</label>
-                <select name="blood_type" class="form-select">
-                    <option value="">-- Tidak Tahu --</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="AB">AB</option>
-                    <option value="O">O</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Agama</label>
-                <select name="religion" class="form-select">
-                    <option value="ISLAM">Islam</option>
-                    <option value="KRISTEN">Kristen</option>
-                    <option value="KATOLIK">Katolik</option>
-                    <option value="HINDU">Hindu</option>
-                    <option value="BUDDHA">Buddha</option>
-                    <option value="KONGHUCU">Konghucu</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Status Perkawinan</label>
-                <select name="marital_status" class="form-select">
-                    <option value="BELUM_KAWIN">Belum Kawin</option>
-                    <option value="KAWIN">Kawin</option>
-                    <option value="CERAI_HIDUP">Cerai Hidup</option>
-                    <option value="CERAI_MATI">Cerai Mati</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Pekerjaan</label>
-                <input type="text" name="occupation" class="form-control" placeholder="Contoh: Wiraswasta, Petani, PNS" value="{{ old('occupation') }}">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Pendidikan Terakhir</label>
-                <input type="text" name="education" class="form-control" placeholder="Contoh: SMA, S1" value="{{ old('education') }}">
-            </div>
-
-            <div class="col-md-8">
-                <label class="form-label small fw-semibold">Alamat Domisili</label>
-                <input type="text" name="address" class="form-control" placeholder="Alamat jalan / kampung" value="{{ old('address') }}">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold">RT</label>
-                <input type="text" name="rt" class="form-control" placeholder="001" value="{{ old('rt') }}">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold">RW</label>
-                <input type="text" name="rw" class="form-control" placeholder="002" value="{{ old('rw') }}">
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label small fw-semibold">Status Kependudukan *</label>
-                <select name="status" class="form-select" required>
-                    <option value="TETAP">Penduduk Tetap</option>
-                    <option value="PINDAH">Pindah Keluar</option>
-                    <option value="MENINGGAL">Meninggal Dunia</option>
-                    <option value="SEMENTARA">Penduduk Sementara</option>
-                </select>
-            </div>
-            <div class="col-md-8">
-                <label class="form-label small fw-semibold">Catatan Tambahan</label>
-                <input type="text" name="notes" class="form-control" placeholder="Keterangan khusus jika ada" value="{{ old('notes') }}">
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-            <a href="{{ route('citizens.index') }}" class="btn btn-light px-4">Batal</a>
-            <button type="submit" class="btn btn-primary px-4">
-                <i class="fa-solid fa-save me-1"></i> Simpan Data Penduduk
-            </button>
-        </div>
-    </form>
-</div>
+<div class="card"><div class="card-body"><h5 class="fw-bold mb-4">Tambah Data Penduduk</h5>
+<form method="POST" action="{{ route('citizens.store') }}">@csrf
+<div class="row g-3">
+@foreach([['nik','NIK','text'],['no_kk','No. KK','text'],['name','Nama Lengkap','text'],['birth_place','Tempat Lahir','text'],['birth_date','Tanggal Lahir','date'],['occupation','Pekerjaan','text'],['education','Pendidikan','text'],['religion','Agama','text'],['marital_status','Status Perkawinan','text'],['address','Alamat','text'],['rt','RT','text'],['rw','RW','text']] as $f)
+<div class="col-md-{{ in_array($f[0],['name','address'])?'6':'4' }}"><label class="form-label">{{ $f[1] }}</label><input name="{{ $f[0] }}" type="{{ $f[2] }}" value="{{ old($f[0]) }}" class="form-control @error($f[0]) is-invalid @enderror">@error($f[0])<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+@endforeach
+<div class="col-md-4"><label class="form-label">Jenis Kelamin</label><select name="gender" class="form-select"><option value="LAKI_LAKI">Laki-laki</option><option value="PEREMPUAN">Perempuan</option></select></div>
+<div class="col-md-4"><label class="form-label">Status Penduduk</label><select name="status" class="form-select"><option>TETAP</option><option>SEMENTARA</option><option>PINDAH</option><option>MENINGGAL</option></select></div>
+<div class="col-md-4"><label class="form-label">Golongan Darah</label><input name="blood_type" class="form-control"></div>
+<div class="col-12"><label class="form-label">Catatan</label><textarea name="notes" class="form-control"></textarea></div>
+</div><div class="mt-4 d-flex gap-2"><button class="btn btn-primary">Simpan</button><a href="{{ route('citizens.index') }}" class="btn btn-light">Batal</a></div>
+</form></div></div>
 @endsection
