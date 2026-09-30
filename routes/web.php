@@ -78,9 +78,9 @@ Route::middleware(['auth', 'first_run'])->group(function () {
         Route::get('/', [EmployeeController::class, 'index'])->name('index');
         Route::get('/create', [EmployeeController::class, 'create'])->name('create');
         Route::post('/store', [EmployeeController::class, 'store'])->name('store');
+        Route::post('/{uuid}/rotate-qr', [EmployeeController::class, 'rotateQr'])->name('rotate-qr');
         Route::get('/{uuid}', [EmployeeController::class, 'show'])->name('show');
         Route::get('/{uuid}/qr-card', [EmployeeController::class, 'qrCard'])->name('qr-card');
-        Route::post('/{uuid}/rotate-qr', [EmployeeController::class, 'rotateQr'])->name('rotate-qr');
         Route::put('/{uuid}', [EmployeeController::class, 'update'])->name('update');
         Route::delete('/{uuid}', [EmployeeController::class, 'destroy'])->name('destroy');
     });
