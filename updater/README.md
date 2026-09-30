@@ -1,51 +1,33 @@
 # SIAP-DESA Updater
 
-The updater is a separate executable/package from the main application.
+Patch package format:
 
-Target artifact:
+`SIAP-DESA-Patch-1.0.1.zip`
 
-`SIAP-DESA-Patch-1.0.1.exe`
+## Transaction
 
-## Required update sequence
+1. Verify installed product and current version.
+2. Verify patch SHA-256.
+3. Verify minimum supported version.
+4. Create database backup.
+5. Stop Web and Sync services.
+6. Snapshot current application files.
+7. Apply patch to Program Files only.
+8. Run Laravel migrations/setup tasks.
+9. Start services.
+10. Check `/health`.
+11. Commit update on success.
+12. Restore application snapshot and database backup on failure.
 
-```
-check version
-    ↓
-backup local database
-    ↓
-stop services
-    ↓
-verify package checksum/signature
-    ↓
-replace Program Files application files
-    ↓
-run migrations
-    ↓
-update version metadata
-    ↓
-start services
-    ↓
-health check
-    ↓
-success / recovery
-```
+## Data protection
 
-## Never update
-
-Do not replace these paths during a normal patch:
+Never overwrite:
 
 - `C:\ProgramData\SIAP-DESA\database`
-- `C:\ProgramData\SIAP-DESA\uploads`
-- `C:\ProgramData\SIAP-DESA\documents`
-- `C:\ProgramData\SIAP-DESA\backups`
-- `C:\ProgramData\SIAP-DESA\device.uuid`
+- `uploads`
+- `documents`
+- `backups`
+- `logs`
+- `device.uuid`
+- local configuration
 
-## Recovery
-
-If the migration or health check fails:
-
-1. stop services
-2. restore application files from the previous package
-3. restore database backup only when required by migration failure
-4. write recovery details to the updater log
-5. keep the installation in recovery state until a compatible patch is applied
