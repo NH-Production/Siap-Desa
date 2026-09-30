@@ -2,11 +2,16 @@
     "name": "siap-desa/app",
     "type": "project",
     "description": "Sistem Informasi Administrasi Pemerintahan Desa (SIAP Desa) - Local First Desktop",
-    "keywords": ["siap-desa", "local-first", "government", "desktop"],
+    "keywords": [
+        "siap-desa",
+        "local-first",
+        "government",
+        "desktop"
+    ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
-        "laravel/framework": "^11.0",
+        "php": "^8.3",
+        "laravel/framework": "^13.0",
         "bacon/bacon-qr-code": "^3.0",
         "dompdf/dompdf": "^3.0",
         "phpoffice/phpspreadsheet": "^2.0",
